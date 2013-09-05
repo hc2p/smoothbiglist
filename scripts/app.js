@@ -13,16 +13,17 @@ var smoothScrollList = (function() {
     } else if (window.ActiveXObject) { // IE 8 and older
         xhr = new ActiveXObject("Microsoft.XMLHTTP");
     }
-    xhr.onreadystatechanged = function() {
+    xhr.onreadystatechange = function() {
       if (this.readyState === 4) {
         if (this.status === 200) {
-          success(httpRequest.responseText);
+          success(this.responseText);
         } else {
           error('There was a problem with the request.');
         }
       }
     };
-    xhr.open('GET', url, true);
+    xhr.open('GET', url);
+    xhr.send();
     return xhr;
   }
 
@@ -64,7 +65,8 @@ var smoothScrollList = (function() {
   }
 
   var _init = function() {
-    xhrGet('scripts/data.json', renderList);
+    var dataUrl = 'https://rawgithub.com/hc2p/smoothbiglist/master/scripts/data.json';
+    xhrGet(dataUrl, renderList);
   };
 
   return {
