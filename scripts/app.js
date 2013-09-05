@@ -7,7 +7,7 @@ http://stackoverflow.com/a/7557433/546030
 
 var smoothScrollList = (function() {
 
-  var xhrGet = function(url, success, error) {
+  var xhrJSONGet = function(url, success, error) {
     if (window.XMLHttpRequest) { // Mozilla, Safari, ...
         xhr = new XMLHttpRequest();
     } else if (window.ActiveXObject) { // IE 8 and older
@@ -16,7 +16,7 @@ var smoothScrollList = (function() {
     xhr.onreadystatechange = function() {
       if (this.readyState === 4) {
         if (this.status === 200) {
-          success(this.responseText);
+          success(JSON.parse(this.responseText));
         } else {
           error('There was a problem with the request.');
         }
@@ -42,7 +42,8 @@ var smoothScrollList = (function() {
     li.appendChild(img);
 
     var name = document.createElement('p');
-    name.nodeValue = item.name;
+    var content = document.createTextNode(item.name);
+    name.appendChild(content);
     li.appendChild(name);
 
     return li;
@@ -60,13 +61,16 @@ var smoothScrollList = (function() {
         );
   }
 
-  var renderList = function() {
-    console.log(arguments);
+  var renderList = function(listData) {
+    var ul = document.getElementsByTagName('ul')[0];
+    for(var i = 0; i < 400; i++) {
+      ul.appendChild(createDomNode(listData[i]));
+    }
   }
 
   var _init = function() {
     var dataUrl = 'https://rawgithub.com/hc2p/smoothbiglist/master/scripts/data.json';
-    xhrGet(dataUrl, renderList);
+    xhrJSONGet(dataUrl, renderList);
   };
 
   return {
