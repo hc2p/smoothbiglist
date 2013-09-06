@@ -1,0 +1,22 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="styles/main.css">
+    <script src="scripts/app.js"></script>
+  </head>
+  <body>
+    <h1>Smooth Big List</h1>
+    <ul id="smoothlist">
+    </ul>
+  <script type="text/javascript">
+    var listEl = document.getElementById('smoothlist');
+    var scrollList = new SmoothScrollList({el: listEl, callback: function() {
+      var lengthOfElementsBefore = listEl.children.length;
+      listEl.scrollTop = listEl.scrollHeight;
+      setTimeout(function() {
+        var lengthOfElementsAfter = listEl.children.length;
+        console.assert(lengthOfElementsBefore < lengthOfElementsAfter, "List did not change");
+      },300);
+    }});
+  </script>
+  </body>
+</html>

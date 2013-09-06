@@ -20,6 +20,7 @@ var SmoothScrollList = function(options) {
   this.xhrJSONGet(dataUrl, function(result) {
     that.listData = result;
     that.renderList(result);
+    options.callback && options.callback();
   });
 };
 
