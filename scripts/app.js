@@ -10,7 +10,7 @@ var SmoothScrollList = function(options) {
   this.listElement = options.el;
   this.listItemHeight;
   this.offset = 0;
-  this.limit = 10;
+  this.limit = 15;
   this.renderedElements = [];
   
   this.addListener(this.listElement, 'scroll', this.handleScroll.bind(this));
