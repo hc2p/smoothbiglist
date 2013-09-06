@@ -1,6 +1,5 @@
 /*
 optimizations:
-- keep track of where last render stoped
 - remove / hide elements when moving out of view
 */
 
@@ -10,8 +9,9 @@ var SmoothScrollList = function(options) {
   this.listData;
   this.listElement = options.el;
   this.listItemHeight;
-  this.treshold = 20; //elements to add regardless their visibility
-  this.renderedElements = {};
+  this.offset = 0;
+  this.limit = 10;
+  this.renderedElements = [];
   
   this.addListener(this.listElement, 'scroll', this.handleScroll.bind(this));
 
@@ -23,7 +23,7 @@ var SmoothScrollList = function(options) {
   });
 };
 
-//http://jsperf.com/innerhtml-vs-dogfragment/10 TODO do own perf test
+//http://jsperf.com/innerhtml-vs-dogfragment/10
 SmoothScrollList.prototype.createDomNode = function(item) {
   /*
     <li data-id="1">
@@ -38,7 +38,7 @@ SmoothScrollList.prototype.createDomNode = function(item) {
   li.appendChild(img);
 
   var name = document.createElement('p');
-  var content = document.createTextNode(item.name);
+  var content = document.createTextNode(item.id + ' ' + item.name);
   name.appendChild(content);
   li.appendChild(name);
 
@@ -77,35 +77,50 @@ SmoothScrollList.prototype.getViewportMax = function() {
   var heightOfView = this.getListHeight();
   var listItemHeight = this.getListItemHeight(this.listData);
   viewportMax = Math.round((this.listElement.scrollTop + heightOfView) / listItemHeight);
-  return viewportMax + this.treshold;
+  return viewportMax + 5;
 };
 
-SmoothScrollList.prototype.renderList = (function() {
-  var listOffset = 0;
-  return function() {
-    var viewportMax = this.getViewportMax();
-    var fragment = document.createDocumentFragment();
-    for(var i = 0; i < viewportMax; i++, listOffset++) {
-      fragment.appendChild(this.getDomNode(this.listData[i + listOffset ]));
-    }
-    this.listElement.appendChild(fragment);
+SmoothScrollList.prototype.renderList = function() {
+  var fragment = document.createDocumentFragment();
+  //rendered first bunch? add a fixed set, otherwise only a few necessary to fill the view
+  var limit = this.offset > 0 ? this.offset + this.limit : this.getViewportMax();
+  var listSize = this.listData.length;
+  for (var i = this.offset; i < limit && i < listSize; i++) {
+    fragment.appendChild(this.getDomNode(this.listData[i]));
   }
-})();
+  this.offset += this.limit;
+  this.listElement.appendChild(fragment);
+}
 
 SmoothScrollList.prototype.handleScroll = (function() {
   var timeout;
   return function() {
     if (!timeout) {
-      var that = this;
       timeout = setTimeout(function() {
-        that.renderList();
+        var thirdLastElement = this.renderedElements[this.renderedElements.length - 3];
+        if (this.isElementInViewport(thirdLastElement)) {
+          this.renderList();
+        }
         time = new Date();
         clearTimeout(timeout);
         timeout = null;
-      }, 250);
+      }.bind(this), 250);
     }
   }
 })();
+
+
+//http://stackoverflow.com/a/7557433/546030
+SmoothScrollList.prototype.isElementInViewport = function (el) {
+  var rect = el.getBoundingClientRect();
+
+  return (
+    rect.top >= 0 &&
+    rect.left >= 0 &&
+    rect.bottom <= (window.innerHeight || document. documentElement.clientHeight) && /*or $(window).height() */
+    rect.right <= (window.innerWidth || document. documentElement.clientWidth) /*or $(window).width() */
+  );
+}
 
 SmoothScrollList.prototype.addListener = function(el, event, callback) {
   // W3C model
