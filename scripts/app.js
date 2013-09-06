@@ -79,16 +79,23 @@ var smoothScrollList = (function() {
       listItemHeight = node.getBoundingClientRect().height;
       return listItemHeight;
     };
-  })()
+  })();
+  
+  var getListHeight = (function() {
+    var listHeight;
+    return function() {
+      listHeight = listElement.getBoundingClientRect().height;
+      return listHeight; 
+    }
+  })();
 
   var getViewportMax = (function() {
     var viewportMax;
+    
     return function(listData) {
-      if (viewportMax) return viewportMax;
-      
+      var heightOfView = getListHeight();
       var listItemHeight = getListItemHeight(listData);
-      var viewportOffset = getViewportOffset();
-      viewportMax = Math.round(viewportOffset.top + viewportOffset.height / listItemHeight);
+      viewportMax = Math.round((listElement.scrollTop + heightOfView) / listItemHeight);
       return viewportMax + treshold;
     };
   })();
@@ -102,25 +109,46 @@ var smoothScrollList = (function() {
     }
   }
 
-  var getViewportOffset = function() {
-    var heightOfView = listElement.getBoundingClientRect().height;
-    var scrollTop = listElement.scrollTop;
-    return {
-      height: heightOfView,
-      top: scrollTop
+  var addListener = function(el, event, callback) {
+    // W3C model
+    if (el.addEventListener) {
+      el.addEventListener(event, callback, false);
+      return true;
+    } 
+    // Microsoft model
+    else if (el.attachEvent) {
+      return el.attachEvent('on' + event, callback);
     }
   };
+
+  var handleScroll = (function() {
+    var time, timeout;
+
+    return function() {
+      var newTime = new Date();
+      if (!timeout) {
+        console.log('add timeout');
+        timeout = setTimeout(function() {
+          renderList(listData);
+          time = new Date();
+          clearTimeout(timeout);
+          timeout = null;
+        }, 250);
+      }
+    }
+  })();
 
   var listData;
   var listElement;
   var listItemHeight;
-  var treshold = 3; //elements to add regardless their visibility
+  var treshold = 10; //elements to add regardless their visibility
   var renderedElements = {};
 
-  var _init = function(options) {
+  var initialize = function(options) {
     if (typeof options !== 'object' || ! options.el) console.error('please initialize the list with an existing dom element');
 
     listElement = options.el;
+    addListener(listElement, 'scroll', handleScroll);
 
     var dataUrl = 'https://rawgithub.com/hc2p/smoothbiglist/master/scripts/data.json';
     xhrJSONGet(dataUrl, function(result) {
@@ -134,6 +162,6 @@ var smoothScrollList = (function() {
   };
 
   return {
-    init: _init
+    init: initialize
   }
 })()
