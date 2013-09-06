@@ -50,7 +50,7 @@ var smoothScrollList = (function() {
   }
 
   //http://stackoverflow.com/a/7557433/546030
-  isElementInViewport = function (el) {
+  var isElementInViewport = function (el) {
     var rect = el.getBoundingClientRect();
 
     return (
@@ -63,14 +63,20 @@ var smoothScrollList = (function() {
 
   var renderList = function(listData) {
     var ul = document.getElementsByTagName('ul')[0];
-    for(var i = 0; i < 400; i++) {
-      ul.appendChild(createDomNode(listData[i]));
+    for(var i = 0, inView = true; i < 400, inView; i++) {
+      var node = createDomNode(listData[i]);
+      ul.appendChild(node);
+      if (! isElementInViewport(node)) inView = false;
     }
   }
 
   var _init = function() {
     var dataUrl = 'https://rawgithub.com/hc2p/smoothbiglist/master/scripts/data.json';
     xhrJSONGet(dataUrl, renderList);
+
+    //render a bunch incrementally check if in viewport
+    // after a certain treshold stop appending
+    // onscroll add more
   };
 
   return {
