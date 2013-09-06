@@ -52,29 +52,17 @@ SmoothScrollList.prototype.getDomNode = function(item) {
   return node;
 };
 
-SmoothScrollList.prototype.getListItemHeight = (function() {
-  var listItemHeight;
-  return function(listData) {
-    if (listItemHeight) return listItemHeight;
-    
-    //render one first element
-    var node = this.getDomNode(listData[0]);
-    this.listElement.appendChild(node);
-    listItemHeight = node.getBoundingClientRect().height;
-    return listItemHeight;
-  };
-})();
+SmoothScrollList.prototype.getListItemHeight = function() {
+  //render one first element
+  var node = this.getDomNode(this.listData[0]);
+  this.listElement.appendChild(node);
+  var listItemHeight = node.getBoundingClientRect().height;
+  return listItemHeight;
+};
 
-SmoothScrollList.prototype.getListHeight = (function() {
-  var listHeight;
-  return function() {
-    listHeight = this.listElement.getBoundingClientRect().height;
-    return listHeight; 
-  }
-})();
 
 SmoothScrollList.prototype.getViewportMax = function() {
-  var heightOfView = this.getListHeight();
+  var heightOfView = this.listElement.getBoundingClientRect().height;
   var listItemHeight = this.getListItemHeight(this.listData);
   viewportMax = Math.round((this.listElement.scrollTop + heightOfView) / listItemHeight);
   return viewportMax + 5;
