@@ -5,11 +5,12 @@
   </head>
   <body>
     <h1>Smooth Big List</h1>
-    <ul>
+    <ul id="smoothlist">
     </ul>
 
   <script type="text/javascript">
-    smoothScrollList.init()
+    var listEl = document.getElementById('smoothlist');
+    smoothScrollList.init({el: listEl})
   </script>
   </body>
 </html>
