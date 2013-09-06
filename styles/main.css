@@ -1,0 +1,14 @@
+li {
+  display: table-row;
+}
+
+img {
+  margin: 0 10px 10px 0;
+  width: 100px;
+  height: 100px;
+}
+
+p {
+  display: table-cell;
+  vertical-align: middle;
+}
