@@ -76,8 +76,9 @@ SmoothScrollList.prototype.renderList = function() {
   var listSize = this.listData.length;
   for (var i = this.offset; i < limit && i < listSize; i++) {
     fragment.appendChild(this.getDomNode(this.listData[i]));
+    this.offset++;
   }
-  this.offset += limit;
+
   this.listElement.appendChild(fragment);
 }
 
